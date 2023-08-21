@@ -23,7 +23,7 @@ function varargout = CalciumToSpikeGUI(varargin)
 
 % Edit the above text to modify the response to help CalciumToSpikeGUI
 
-% Last Modified by GUIDE v2.5 21-Aug-2023 11:52:23
+% Last Modified by GUIDE v2.5 21-Aug-2023 16:07:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -166,7 +166,7 @@ try
     save('calciumToSpikeParams.mat','calciumToSpikeParams')
     set(handles.calculateDffButton,'String','dF/F done','BackgroundColor','green','ForegroundColor','black')
     set(handles.calculateSpike,'Enable','on')
-    set(handles.GUIstatusBox,'String','No issues','ForegroundColor',[0.64 0.08 0.18])
+    set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
     
 catch
     set(handles.GUIstatusBox,'String','dF/F calculation error','ForegroundColor',[0.64 0.08 0.18])
@@ -198,7 +198,7 @@ try
     cd(calciumToSpikeParams.originalCodePath)
 
     set(handles.calculateSpike,'String','dF/F to Spike done','BackgroundColor','green','ForegroundColor','black')
-    set(handles.GUIstatusBox,'String','No issues','ForegroundColor',[0.64 0.08 0.18])
+    set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
     set(handles.roiExporter,'Enable','on')
 
  catch
@@ -235,7 +235,7 @@ try
     save('C2S_AnalyzedData.mat','xCoord','yCoord','-append')
     calciumToSpikeParams.isROIExportDone = 0;
     set(handles.roiExporter,'String','ROIs Exported','ForegroundColor','black','BackgroundColor','green')
-    set(handles.GUIstatusBox,'String','No issues','ForegroundColor',[0.64 0.08 0.18])
+    set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
         
     set(handles.totalCells,'String',num2str(calciumToSpikeParams.totalCells))
     set(handles.cellsAfterPSNR,'String',num2str(calciumToSpikeParams.cellsPassingPSNRfilter))
@@ -267,6 +267,7 @@ set(handles.roiExporter,'Enable','off','BackgroundColor',[0.94 0.94 0.94],'Foreg
 set(handles.calculateDffButton,'Enable','off','String','Calculate dF/F','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 set(handles.FallFileSelectionButton,'Enable','off','BackgroundColor',[0.94 0.94 0.94])
 set(handles.isCellStatusBox,'String','isCell status:','ForegroundColor',[0.4 0.4 0.4])
+set(handles.spikePool,'String','Pool All Spike','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 
 set(handles.totalCells,'String','')
 set(handles.cellsAfterPSNR,'String','')
@@ -304,10 +305,12 @@ function spikePool_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     load('calciumToSpikeParams.mat')
-    CompileSpikeData(calciumToSpikeParams.numLayers)
-    set(handles.spikePool,'BackgroundColor',rand(1,3));
+    CompileSpikeData(calciumToSpikeParams)
+    set(handles.spikePool,'BackgroundColor','green');
+    set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
 catch
-    disp('Pooling spikedata inturrupted')
+    set(handles.GUIstatusBox,'String','Layerwise spike-pooling interrupted','ForegroundColor',[0.64 0.08 0.18])
+    set(handles.spikePool,'String','Pool All Spike','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 end
 
 
@@ -318,10 +321,12 @@ function ROIPool_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     load('calciumToSpikeParams.mat')
-    CompileROIData(calciumToSpikeParams.numLayers)
-    set(handles.ROIPool,'BackgroundColor',rand(1,3));
+    CompileROIData(calciumToSpikeParams)
+    set(handles.ROIPool,'BackgroundColor','green')
+    set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
 catch
-    disp('Pooling ROI coordinates inturrupted')
+    set(handles.GUIstatusBox,'String','Layerwise ROI-pooling interrupted','ForegroundColor',[0.64 0.08 0.18])
+    set(handles.ROIPool,'String','Pool All ROI Coords','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 end
 
 
@@ -465,3 +470,14 @@ set(handles.roiExporter,'Enable','off','BackgroundColor',[0.94 0.94 0.94],'Foreg
 set(handles.totalCells,'String','')
 set(handles.cellsAfterPSNR,'String','')
 set(handles.unitsWithROIexported,'String','')
+
+
+% --- Executes on button press in resetPooling.
+function resetPooling_Callback(hObject, eventdata, handles)
+% hObject    handle to resetPooling (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+set(handles.spikePool,'String','Pool All Spike','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
+set(handles.ROIPool,'String','Pool All ROI Coords','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
+set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
