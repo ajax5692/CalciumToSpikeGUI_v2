@@ -4,7 +4,7 @@ function CompileSpikeData(calciumToSpikeParams)
 %across the different layers.
 
 
-
+cd(calciumToSpikeParams.saveAnalyzedData)
 for layerIndex = 1:calciumToSpikeParams.numLayers
     
     [fileName filePath] = uigetfile('',strcat('Open the layer', " ", num2str(layerIndex)," ",'data that was obtained using the CalciumToSpike GUI'));

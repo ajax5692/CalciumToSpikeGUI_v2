@@ -23,7 +23,7 @@ function varargout = CalciumToSpikeGUI(varargin)
 
 % Edit the above text to modify the response to help CalciumToSpikeGUI
 
-% Last Modified by GUIDE v2.5 21-Aug-2023 16:07:27
+% Last Modified by GUIDE v2.5 22-Aug-2023 14:03:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,6 +59,7 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 warning off
+set(handles.mescCheckbox,'Enable','off')
 set(handles.saveAnalyzedDataLocationButton,'Enable','on','BackgroundColor',[0.94 0.94 0.94])
 set(handles.calculateSpike,'Enable','off')
 set(handles.roiExporter,'Enable','off')
@@ -216,7 +217,6 @@ function roiExporter_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 load('calciumToSpikeParams.mat')
-
 lastBackslashIndex = find(calciumToSpikeParams.FallDataPath == '\', 1, 'last');
 % Crop the text until the last backslash, this changes the folder path containing the selected Fall.mat file
 cd(calciumToSpikeParams.FallDataPath(1:lastBackslashIndex - 1))
@@ -260,18 +260,29 @@ function resetGUI_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
-set(handles.saveAnalyzedDataLocationButton,'String','Specify save location for analyzed data','Enable','on','BackgroundColor',[0.94 0.94 0.94])
-set(handles.mescFileSelectionButton,'Enable','off','BackgroundColor',[0.94 0.94 0.94])
 set(handles.calculateSpike,'String','Convert dF/F to Spike','Enable','off','BackgroundColor',[0.94 0.94 0.94],'ForegroundColor','black')
-set(handles.roiExporter,'Enable','off','BackgroundColor',[0.94 0.94 0.94],'ForegroundColor','black')
+set(handles.roiExporter,'String','Export ROIs','Enable','off','BackgroundColor',[0.94 0.94 0.94],'ForegroundColor','black')
 set(handles.calculateDffButton,'Enable','off','String','Calculate dF/F','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
-set(handles.FallFileSelectionButton,'Enable','off','BackgroundColor',[0.94 0.94 0.94])
-set(handles.isCellStatusBox,'String','isCell status:','ForegroundColor',[0.4 0.4 0.4])
 set(handles.spikePool,'String','Pool All Spike','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
+set(handles.ROIPool,'String','Pool All ROI Coords','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 
 set(handles.totalCells,'String','')
 set(handles.cellsAfterPSNR,'String','')
 set(handles.unitsWithROIexported,'String','')
+
+if get(handles.mescCheckbox, 'Value') == 0
+    set(handles.mescFileSelectionButton,'Enable','off','BackgroundColor',[0.94 0.94 0.94])
+    set(handles.saveAnalyzedDataLocationButton,'String','Specify save location for analyzed data','Enable','on','BackgroundColor',[0.94 0.94 0.94])
+    set(handles.mescCheckbox,'Enable','off','ForegroundColor',[0.4 0.4 0.4])
+    set(handles.FallFileSelectionButton,'String','Select Fall.mat file','Enable','off','BackgroundColor',[0.94 0.94 0.94])
+    set(handles.isCellStatusBox,'String','isCell status:','ForegroundColor',[0.4 0.4 0.4])
+else get(handles.mescCheckbox, 'Value') == 1
+    set(handles.mescFileSelectionButton,'Enable','on','String','MESc file selected','BackgroundColor','green','ForegroundColor','black')
+    set(handles.saveAnalyzedDataLocationButton,'String','Save location specified','Enable','on','BackgroundColor','green')
+    set(handles.FallFileSelectionButton,'Enable','on','BackgroundColor',[0.94 0.94 0.94])
+    set(handles.FallFileSelectionButton,'String','Select Fall.mat file','Enable','on','BackgroundColor',[0.94 0.94 0.94])
+    set(handles.isCellStatusBox,'String','isCell status:','ForegroundColor',[0.64 0.08 0.18])
+end
 
 
 
@@ -339,6 +350,7 @@ function numberOfLayers_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of numberOfLayers as a double
 load('calciumToSpikeParams.mat')
 calciumToSpikeParams.numLayers = str2double(get(hObject,'String'));
+cd(calciumToSpikeParams.originalCodePath)
 save('calciumToSpikeParams.mat','calciumToSpikeParams')
 
 
@@ -374,6 +386,7 @@ while calciumToSpikeParams.isSaveDataLocationSet == 0
         save('calciumToSpikeParams.mat','calciumToSpikeParams')
         set(handles.saveAnalyzedDataLocationButton,'String','Save location specified','BackgroundColor','green')
         set(handles.mescFileSelectionButton,'Enable','on')
+        set(handles.mescCheckbox,'Enable','on','ForegroundColor',[0.64 0.08 0.18])
         set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
     else
         calciumToSpikeParams.isSaveDataLocationSet = 1;
@@ -393,6 +406,7 @@ function mescFileSelectionButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.mescFileSelectionButton,'String','Select MESc file','BackgroundColor',[0.94 0.94 0.94])
 load('calciumToSpikeParams.mat')
+cd(calciumToSpikeParams.saveAnalyzedData)
 while calciumToSpikeParams.isMescFileSelected == 0
     [calciumToSpikeParams.mescDataName, calciumToSpikeParams.mescDataLocation] = uigetfile('*.mesc','Select the MESc data');
     if ischar(calciumToSpikeParams.mescDataLocation) == 1
@@ -425,7 +439,9 @@ function FallFileSelectionButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.FallFileSelectionButton,'String','Select Fall.mat file','BackgroundColor',[0.94 0.94 0.94])
 load('calciumToSpikeParams.mat')
+cd(calciumToSpikeParams.saveAnalyzedData)
 while calciumToSpikeParams.isFallSelected == 0
+    set(handles.FallFileSelectionButton,'String','Selection Running','ForegroundColor','red')
     [fileName, filePath] = uigetfile('*.mat','Select the Fall.mat file');
     if ischar(filePath) == 1
         calciumToSpikeParams.FallDataPath = strcat(filePath,fileName);
@@ -438,7 +454,7 @@ while calciumToSpikeParams.isFallSelected == 0
         end
         cd(calciumToSpikeParams.originalCodePath)
         save('calciumToSpikeParams.mat','calciumToSpikeParams')
-        set(handles.FallFileSelectionButton,'String','Fall.mat selected','BackgroundColor','green')
+        set(handles.FallFileSelectionButton,'String','Fall.mat selected','BackgroundColor','green','ForegroundColor','black')
         set(handles.calculateDffButton,'Enable','on')
         set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
         calciumToSpikeParams.isFallSelected = 1;
@@ -481,3 +497,14 @@ function resetPooling_Callback(hObject, eventdata, handles)
 set(handles.spikePool,'String','Pool All Spike','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 set(handles.ROIPool,'String','Pool All ROI Coords','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
+
+
+% --- Executes on button press in mescCheckbox.
+function mescCheckbox_Callback(hObject, eventdata, handles)
+% hObject    handle to mescCheckbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of mescCheckbox
+
+

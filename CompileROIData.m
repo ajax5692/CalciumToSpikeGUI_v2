@@ -3,6 +3,7 @@ function CompileROIData(calciumToSpikeParams)
 %This function creates a matrix containing all the ROI coordinate
 %information across the different layers.
 
+cd(calciumToSpikeParams.saveAnalyzedData)
 for layerIndex = 1:calciumToSpikeParams.numLayers
     
     [fileName filePath] = uigetfile('',strcat('Open the layer', " ", num2str(layerIndex)," ",'data that was obtained using the CalciumToSpike GUI'));

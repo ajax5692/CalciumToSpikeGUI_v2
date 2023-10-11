@@ -10,4 +10,8 @@ clearvars tempVar
 load(calciumToSpikeParams.FallDataPath);
 clear iscell
 
+lastBackslashIndex = find(calciumToSpikeParams.FallDataPath == '\', 1, 'last');
+% Crop the text until the last backslash, this changes the folder path containing the selected Fall.mat file
+cd(calciumToSpikeParams.FallDataPath(1:lastBackslashIndex - 1))
+
 save('Fall.mat', '-regexp', '^(?!calciumToSpikeParams$).')
