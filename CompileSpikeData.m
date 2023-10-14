@@ -5,15 +5,17 @@ function CompileSpikeData(calciumToSpikeParams)
 
 
 cd(calciumToSpikeParams.saveAnalyzedData)
+
+analyzedFiles = dir('*.mat');
+
+
 for layerIndex = 1:calciumToSpikeParams.numLayers
-    
-    [fileName filePath] = uigetfile('',strcat('Open the layer', " ", num2str(layerIndex)," ",'data that was obtained using the CalciumToSpike GUI'));
-    cd(filePath)
-    load(fileName)
+        
+    load(analyzedFiles(layerIndex).name)
     
     spikeData(layerIndex).layer = populationSpikeMatrix;
 
-    clearvars -except spikeData calciumToSpikeParams
+    clearvars -except spikeData calciumToSpikeParams analyzedFiles layerIndex
     
 end
 

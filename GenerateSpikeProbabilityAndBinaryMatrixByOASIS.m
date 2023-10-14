@@ -1,4 +1,4 @@
-function [populationSpikeMatrix, populationSpikeProbability] = GenerateSpikeProbabilityAndBinaryMatrixByOASIS(deltaff)
+function [populationSpikeMatrix, populationSpikeProbability, w] = GenerateSpikeProbabilityAndBinaryMatrixByOASIS(deltaff,w)
 
 %GenerateSpikeProbabilityAndBinaryMatrixByOASIS
 %This function takes in the df/f values and evaluates the spike
@@ -6,13 +6,14 @@ function [populationSpikeMatrix, populationSpikeProbability] = GenerateSpikeProb
 %matrix corresponding to the spikes.
 
 
-w = waitbar(0, 'Starting');
+w = multiWaitbar('OASIS',0,'Color','b');
+
 totalCells = size(deltaff,1);
 oasis_setup
 
 for cellIndex = 1:size(deltaff,1)
     
-    waitbar(cellIndex/totalCells, w, sprintf('Progress (OASIS)', floor(cellIndex/totalCells*100)));
+    w = multiWaitbar('OASIS', (cellIndex/totalCells));
     
     [c, s, options] = deconvolveCa(deltaff(cellIndex,:), 'thresholded', 'ar1', 'smin', -3, 'optimize_pars', true, 'optimize_b', true);
     
@@ -22,14 +23,10 @@ for cellIndex = 1:size(deltaff,1)
                 
 end
 
-close(w)
 
 %Generate 1/0 spike matrix for the population
-w = waitbar(0, 'Starting');
 
 for cellIndex = 1:size(populationSpikeProbability,1)
-    
-    waitbar(cellIndex/totalCells, w, sprintf('Progress (spikes)', floor(cellIndex/totalCells*100)));
     
     for frameIndex = 1:size(populationSpikeProbability,2)
         
@@ -45,4 +42,4 @@ for cellIndex = 1:size(populationSpikeProbability,1)
     end
 end
 
-close(w)
+w = multiWaitbar('OASIS','Reset','Close');

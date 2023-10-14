@@ -153,24 +153,15 @@ load('calciumToSpikeParams.mat')
 try
     while calciumToSpikeParams.isAnalysisDone == 0;
         set(handles.analyzeDataButton,'String','Analysis Running','ForegroundColor','red')
-        w = multiWaitbar('Overall Progress','Value',0);
         
         %This part calculates the dF/f
-        [deltaff,PSNR,w] = DffCalculationAfterPSNRfiltering(calciumToSpikeParams,w);
-        w = multiWaitbar('Overall Progress','Value',0.33);
-        calciumToSpikeParams.PSNR = PSNR;
-        calciumToSpikeParams.totalCells = length(calciumToSpikeParams.PSNR);
-        calciumToSpikeParams.cellsPassingPSNRfilter = size(deltaff,1);
-        cd(calciumToSpikeParams.originalCodePath)
-        save('calciumToSpikeParams.mat','calciumToSpikeParams')
+        [deltaff,PSNR] = DffCalculationAfterPSNRfiltering(calciumToSpikeParams);
 
-        %This part creates the binary spike matrix using OASIS
-        [populationSpikeMatrix, populationSpikeProbability,w] = GenerateSpikeProbabilityAndBinaryMatrixByOASIS(deltaff,w);
-        w = multiWaitbar('Overall Progress','Value',0.67);
-        
+        %This part creates the binary spike matric using OASIS
+        [populationSpikeMatrix, populationSpikeProbability] = GenerateSpikeProbabilityAndBinaryMatrixByOASIS(deltaff);
+        lastBackslashIndex = find(calciumToSpikeParams.FallDataPath == '\', 1, 'last');
         
         %This part exports the ROI center co-ordinates
-        lastBackslashIndex = find(calciumToSpikeParams.FallDataPath == '\', 1, 'last');
         % Crop the text until the last backslash, this changes the folder path containing the selected Fall.mat file
         cd(calciumToSpikeParams.FallDataPath(1:lastBackslashIndex - 1))
         
@@ -178,14 +169,16 @@ try
         load(calciumToSpikeParams.FallDataPath(lastBackslashIndex + 1:end))
         [xCoord,yCoord] = RoiCoordinateExporterFromSuite2p(stat,isCell,calciumToSpikeParams);
         
-        w = multiWaitbar('Overall Progress','Value',1);
-        w = multiWaitbar('Overall Progress','Reset','Close');
-        calciumToSpikeParams.isAnalysisDone = 1;
+        
+        calciumToSpikeParams.isDffDone = 1;
      end
 
     cd(calciumToSpikeParams.saveAnalyzedData)
     save(strcat('C2S_AnalyzedData_L',num2str(calciumToSpikeParams.whichLayer),'.mat'),'PSNR','deltaff','populationSpikeProbability','populationSpikeMatrix','xCoord','yCoord')
 
+    calciumToSpikeParams.PSNR = PSNR;
+    calciumToSpikeParams.totalCells = length(calciumToSpikeParams.PSNR);
+    calciumToSpikeParams.cellsPassingPSNRfilter = size(deltaff,1);
     cd(calciumToSpikeParams.originalCodePath)
     calciumToSpikeParams.isAnalysisDone = 0;
     save('calciumToSpikeParams.mat','calciumToSpikeParams')
@@ -196,8 +189,6 @@ catch
     set(handles.GUIstatusBox,'String','Data analysis error','ForegroundColor',[0.64 0.08 0.18])
     set(handles.analyzeDataButton,'String','Analyze data','BackgroundColor',[0.94 0.94 0.94],'ForegroundColor','black')
     cd(calciumToSpikeParams.originalCodePath)
-    w = multiWaitbar('Overall Progress','Reset','Close');
-    w = multiWaitbar('Calculating dF/F','Reset','Close');
 end
 
 
@@ -264,11 +255,9 @@ function dataPoolButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     load('calciumToSpikeParams.mat')
-    set(handles.dataPoolButton,'ForegroundColor','red','String','Data pooling running');
-    pause(0.5)
     CompileSpikeData(calciumToSpikeParams)
     CompileROIData(calciumToSpikeParams)
-    set(handles.dataPoolButton,'String','Data pooling complete','BackgroundColor','green','ForegroundColor','black');
+    set(handles.dataPoolButton,'BackgroundColor','green');
     set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
 catch
     set(handles.GUIstatusBox,'String','Layerwise data pooling interrupted','ForegroundColor',[0.64 0.08 0.18])
@@ -349,7 +338,7 @@ while calciumToSpikeParams.isMescFileSelected == 0
         cd(calciumToSpikeParams.originalCodePath)
         save('calciumToSpikeParams.mat','calciumToSpikeParams')
         set(handles.mescFileSelectionButton,'String','MESc file selected','BackgroundColor','green')
-        set(handles.whichLayer,'Enable','on')
+        set(handles.FallFileSelectionButton,'Enable','on')
         set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
         cd(calciumToSpikeParams.mescDataLocation)
         tStepsInMs = h5readatt(strcat(calciumToSpikeParams.mescDataLocation,calciumToSpikeParams.mescDataName),'/MSession_0/MUnit_20/','TStepInMs');
@@ -391,13 +380,13 @@ while calciumToSpikeParams.isFallSelected == 0
         cd(calciumToSpikeParams.originalCodePath)
         save('calciumToSpikeParams.mat','calciumToSpikeParams')
         set(handles.FallFileSelectionButton,'String','Fall.mat selected','BackgroundColor','green','ForegroundColor','black')
-        set(handles.analyzeDataButton,'Enable','on')
+        set(handles.whichLayer,'Enable','on')
         set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
         calciumToSpikeParams.isFallSelected = 1;
     else
         calciumToSpikeParams.isFallSelected = 1;
         save('calciumToSpikeParams.mat','calciumToSpikeParams')
-        set(handles.FallFileSelectionButton,'Enable','on','String','Select Fall.mat file','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
+        set(handles.FallFileSelectionButton,'Enable','on','BackgroundColor',[0.94 0.94 0.94])
         set(handles.isCellStatusBox,'String','isCell status:','ForegroundColor',[0.4 0.4 0.4])
         set(handles.GUIstatusBox,'String','Fall.mat file selection interrupted','ForegroundColor',[0.64 0.08 0.18])
     end
@@ -416,7 +405,6 @@ function resetAnalyzeDataButton_Callback(hObject, eventdata, handles)
 set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
 set(handles.whichLayer,'Enable','on','Value',1)
 set(handles.analyzeDataButton,'Enable','off','String','Analyze data','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
-set(handles.FallFileSelectionButton,'Enable','off','String','Select Fall.mat file','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
 
 set(handles.totalCells,'String','')
 set(handles.cellsAfterPSNR,'String','')
@@ -454,17 +442,14 @@ load('calciumToSpikeParams.mat')
 calciumToSpikeParams.whichLayer = get(handles.whichLayer, 'Value') - 1;
 cd(calciumToSpikeParams.saveAnalyzedData)
 if isfile(strcat('C2S_AnalyzedData_L',num2str(calciumToSpikeParams.whichLayer),'.mat')) == 1
-    beep
     set(handles.GUIstatusBox,'String','Analyzed data for this layer already exists!!','ForegroundColor',[0.64 0.08 0.18])
-    set(handles.analyzeDataButton,'Enable','off','String','Analyze data','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
-    set(handles.FallFileSelectionButton,'Enable','off','String','Select Fall.mat file','ForegroundColor','black','BackgroundColor',[0.94 0.94 0.94])
-    cd(calciumToSpikeParams.originalCodePath)
-else
-    set(handles.GUIstatusBox,'String','No issues','ForegroundColor','black')
-    cd(calciumToSpikeParams.originalCodePath)
-    save('calciumToSpikeParams.mat','calciumToSpikeParams')
-    set(handles.FallFileSelectionButton,'Enable','on')
-end
+    
+
+
+
+save('calciumToSpikeParams.mat','calciumToSpikeParams')
+
+set(handles.analyzeDataButton,'Enable','on')
 
 
 % --- Executes during object creation, after setting all properties.

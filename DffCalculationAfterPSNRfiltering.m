@@ -1,4 +1,4 @@
-function [deltaff,PSNR] = DffCalculationAfterPSNRfiltering(calciumToSpikeParams)
+function [deltaff,PSNR,w] = DffCalculationAfterPSNRfiltering(calciumToSpikeParams,w)
 
 %ReadRawFluorAndDff
 %This function reads the raw cell fluorescence data from the Fall.mat file
@@ -28,7 +28,7 @@ load(calciumToSpikeParams.FallDataPath)
 % save('koko.mat','ops','-append')
 %%
 
-[deltaff] = DffCalculationForC2Sgui(F,calciumToSpikeParams,isCell,Fneu,PSNR);
+[deltaff,w] = DffCalculationForC2Sgui(F,calciumToSpikeParams,isCell,Fneu,PSNR,w);
 
 
 

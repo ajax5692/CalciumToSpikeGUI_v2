@@ -1,4 +1,4 @@
-function deltaff = DffCalculationForC2Sgui(F,calciumToSpikeParams,isCell,Fneu,PSNR)
+function [deltaff,w] = DffCalculationForC2Sgui(F,calciumToSpikeParams,isCell,Fneu,PSNR,w)
 
 %This function evaluates the dF/F values for only those cells whose
 %criteria are defined by the user.
@@ -7,7 +7,7 @@ function deltaff = DffCalculationForC2Sgui(F,calciumToSpikeParams,isCell,Fneu,PS
 frameRate = calciumToSpikeParams.frameRate;
 timeStamp = (1:numel(F(1,:))).*(1/calciumToSpikeParams.frameRate); %This is in seconds
 
-w = waitbar(0, 'Starting');
+w = multiWaitbar('Calculating dF/F',0,'Color','b');
 n = sum(isCell(:,1));
 counter = 0;
 cellCounter = 1;
@@ -20,7 +20,7 @@ for cellIndex = 1:size(F,1)
 
         case 1 %If both cell detection and cell probability values are the criteria
 
-            waitbar(cellCounter/n, w, sprintf('Progress', floor(cellCounter/n*100)));
+            w = multiWaitbar('Calculating dF/F',(cellCounter/n));
 
             if isCell(cellIndex,1) == 1 & isCell(cellIndex,2) >= calciumToSpikeParams.cellClassifierThreshold
 
@@ -76,8 +76,7 @@ for cellIndex = 1:size(F,1)
 
                 newCounter = newCounter + 1;
 
-                waitbar(newCounter/n, w, sprintf('Progress', floor(cellCounter/n*100)));
-
+                w = multiWaitbar('Calculating dF/F',(newCounter/n));
 
                 %Applying PSNR filter. PSNR minimum value sould be 18dB and maximum value should not exceed 4 SD value
 
@@ -122,7 +121,6 @@ for cellIndex = 1:size(F,1)
 
 end
 
-close(w)
 
 %This deletes the zero vectors that can originate due to PSNR filtering.
 deltaff(any(isnan(deltaff), 2), :) = [];
@@ -131,3 +129,4 @@ deltaff( all(~deltaff,2), : ) = [];
 
 
 deltaff = double(deltaff);
+w = multiWaitbar('Calculating dF/F','Reset','Close');
