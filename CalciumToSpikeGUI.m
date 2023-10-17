@@ -149,6 +149,9 @@ function analyzeDataButton_Callback(hObject, eventdata, handles)
 % hObject    handle to analyzeDataButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+functionRunningIndicator = uifigure;
+functionRunningIndicator.Position(3:4) = [400 100];
+textInFunctionRunningIndicator = uiprogressdlg(functionRunningIndicator,'Title','Analysis Running','Indeterminate','on');
 load('calciumToSpikeParams.mat')
 try
     while calciumToSpikeParams.isAnalysisDone == 0;
@@ -199,8 +202,9 @@ catch
     w = multiWaitbar('Overall Progress','Reset','Close');
     w = multiWaitbar('Calculating dF/F','Reset','Close');
 end
-
-
+close(functionRunningIndicator)
+close(textInFunctionRunningIndicator)
+clear functionRunningIndicator textInFunctionRunningIndicator
 
 % --- Executes on button press in resetGUI.
 function resetGUI_Callback(hObject, eventdata, handles)
