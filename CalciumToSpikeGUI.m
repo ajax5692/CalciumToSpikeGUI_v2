@@ -93,9 +93,10 @@ end
 
 set(handles.numberOfLayers,'String',calciumToSpikeParams.numLayers)
 
+calciumToSpikeParams.originalCodePath = pwd;
 % calciumToSpikeParams.originalCodePath = uigetdir('','Define the code repository path first');
-% cd(calciumToSpikeParams.originalCodePath)
-% save('calciumToSpikeParams.mat','calciumToSpikeParams')
+cd(calciumToSpikeParams.originalCodePath)
+save('calciumToSpikeParams.mat','calciumToSpikeParams')
 
 
 
