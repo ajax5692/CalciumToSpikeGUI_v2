@@ -188,7 +188,8 @@ try
      end
 
     cd(calciumToSpikeParams.saveAnalyzedData)
-    save(strcat('C2S_AnalyzedData_L',num2str(calciumToSpikeParams.whichLayer),'.mat'),'PSNR','deltaff','populationSpikeProbability','populationSpikeMatrix','xCoord','yCoord')
+    dateTimeStamp = datetime('now');
+    save(strcat('C2S_AnalyzedData_L',num2str(calciumToSpikeParams.whichLayer),'.mat'),'PSNR','deltaff','populationSpikeProbability','populationSpikeMatrix','xCoord','yCoord','dateTimeStamp')
 
     cd(calciumToSpikeParams.originalCodePath)
     calciumToSpikeParams.isAnalysisDone = 0;

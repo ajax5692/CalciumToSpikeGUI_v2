@@ -18,8 +18,10 @@ for layerIndex = 1:calciumToSpikeParams.numLayers
     
 end
 
+dateTimeStamp = datetime('now');
+
 cd(calciumToSpikeParams.saveAnalyzedData)
 allROIMatrix = [horzcat(roiCoordData(:,1).layer); horzcat(roiCoordData(:,2).layer);];
-save('layerWiseRoiCoordData.mat','roiCoordData')
+save('layerWiseRoiCoordData.mat','roiCoordData','dateTimeStamp')
 save('allLayerROIsPooled.mat','allROIMatrix')
 cd(calciumToSpikeParams.originalCodePath)

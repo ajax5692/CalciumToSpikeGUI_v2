@@ -19,9 +19,9 @@ for layerIndex = 1:calciumToSpikeParams.numLayers
     
 end
 
-
+dateTimeStamp = datetime('now');
 cd(calciumToSpikeParams.saveAnalyzedData)
 allSpikeMatrix = vertcat(spikeData(:).layer);
-save('layerWiseSpikeData.mat','spikeData')
+save('layerWiseSpikeData.mat','spikeData','dateTimeStamp')
 save('allLayerSpikesPooled.mat','allSpikeMatrix')
 cd(calciumToSpikeParams.originalCodePath)
